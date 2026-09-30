@@ -18,7 +18,7 @@ const setNote = s => s.pokemon ? 'English catalogue matches for '+s.pokemon.join
 const titles = {browse:['Your next complete set.','Discover the cards. Fill the gaps. Build something worth keeping.','Browse cards'],collection:['A collection that’s yours.','Every pull, every trade, every favourite. All in one place.','My collection'],master:['One card closer.','Turn a whole set into a checklist. See exactly what’s left to find.','Master sets'],wishlist:['The ones you’re chasing.','Keep your next great finds together.','Wishlist'],stats:['Your collection, at a glance.','A little perspective on everything you’ve collected.','Collection stats']};
 let S={owned:{},tracked:{},wishlist:[]}, token='', catalogue=[], activeSet=null, view='browse', filter='all', query='', sort='number', pageSize=36, selected=new Set(), cards=new Map(), sets=new Map(), requestId=0, toastTimer;
 const modal=$('#modal');
-async function api(path,body){const r=await fetch('/api/'+path,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json','X-Vault-Token':token}:{},body:body?JSON.stringify(body):undefined});const d=await r.json();if(!r.ok)throw Error(d.error||'Something went wrong');return d;}
+async function api(path,body){const r=await fetch('/api/'+path,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json','X-Vault-Token':token}:{},body:body?JSON.stringify({...body,revision:S.revision}):undefined});const d=await r.json();if(!r.ok)throw Error(d.error||'Something went wrong');return d;}
 function notify(msg){$('#toast').textContent=msg;$('#toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').style.display='none',4500);}
 async function save(action,body){const n=await api(action,body);S=n;summary();return n;}
 function variants(c){return Object.keys(names).filter(v=>c.variants?.[v]) .filter(v=>v!=='unspecified').length?Object.keys(names).filter(v=>c.variants?.[v]):['unspecified'];}
@@ -81,3 +81,6 @@ $('#backup').onclick=async()=>{try{const d=await api('export');const url=URL.cre
 window.addEventListener('hashchange',()=>{if(location.hash==='#browse')navigate('browse');});
 async function init(){try{const d=await api('state');token=d.token;delete d.token;S=d;catalogue=await api('sets');await navigate('browse');}catch(e){failure(e);}}
 init();
+
+let syncBusy=false;async function syncVault(){if(syncBusy||modal.open||selected.size||document.hidden)return;syncBusy=true;try{const d=await api('state');if(d.revision!==S.revision){token=d.token;delete d.token;S=d;sets.clear();await navigate(view,activeSet?.id);notify('Shared collection updated.');}}catch{}finally{syncBusy=false;}}setInterval(syncVault,15000);window.addEventListener('focus',syncVault);
+if(document.modelContext?.registerTool)document.modelContext.registerTool({name:'read_collection_summary',description:'Read counts from the shared Pokémon collection.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:()=>({ownedCopies:Object.values(S.owned).reduce((n,x)=>n+x.quantity,0),checklists:Object.values(S.tracked).map(x=>x.name),wishlist:S.wishlist.length})});
