@@ -1,8 +1,87 @@
-""" imageio_ffmpeg, FFMPEG wrapper for Python.
+"""Pillow (Fork of the Python Imaging Library)
+
+Pillow is the friendly PIL fork by Jeffrey 'Alex' Clark and contributors.
+    https://github.com/python-pillow/Pillow/
+
+Pillow is forked from PIL 1.1.7.
+
+PIL is the Python Imaging Library by Fredrik Lundh and contributors.
+Copyright (c) 1999 by Secret Labs AB.
+
+Use PIL.__version__ for this Pillow version.
+
+;-)
 """
 
-# flake8: noqa
+from __future__ import annotations
 
-from ._definitions import __version__
-from ._io import count_frames_and_secs, read_frames, write_frames
-from ._utils import get_ffmpeg_exe, get_ffmpeg_version
+from . import _version
+
+# VERSION was removed in Pillow 6.0.0.
+# PILLOW_VERSION was removed in Pillow 9.0.0.
+# Use __version__ instead.
+__version__ = _version.__version__
+del _version
+
+
+_plugins = [
+    "AvifImagePlugin",
+    "BlpImagePlugin",
+    "BmpImagePlugin",
+    "BufrStubImagePlugin",
+    "CurImagePlugin",
+    "DcxImagePlugin",
+    "DdsImagePlugin",
+    "EpsImagePlugin",
+    "FitsImagePlugin",
+    "FliImagePlugin",
+    "FpxImagePlugin",
+    "FtexImagePlugin",
+    "GbrImagePlugin",
+    "GifImagePlugin",
+    "GribStubImagePlugin",
+    "Hdf5StubImagePlugin",
+    "IcnsImagePlugin",
+    "IcoImagePlugin",
+    "ImImagePlugin",
+    "ImtImagePlugin",
+    "IptcImagePlugin",
+    "JpegImagePlugin",
+    "Jpeg2KImagePlugin",
+    "McIdasImagePlugin",
+    "MicImagePlugin",
+    "MpegImagePlugin",
+    "MpoImagePlugin",
+    "MspImagePlugin",
+    "PalmImagePlugin",
+    "PcdImagePlugin",
+    "PcxImagePlugin",
+    "PdfImagePlugin",
+    "PixarImagePlugin",
+    "PngImagePlugin",
+    "PpmImagePlugin",
+    "PsdImagePlugin",
+    "QoiImagePlugin",
+    "SgiImagePlugin",
+    "SpiderImagePlugin",
+    "SunImagePlugin",
+    "TgaImagePlugin",
+    "TiffImagePlugin",
+    "WebPImagePlugin",
+    "WmfImagePlugin",
+    "XbmImagePlugin",
+    "XpmImagePlugin",
+    "XVThumbImagePlugin",
+]
+
+
+class UnidentifiedImageError(OSError):
+    """
+    Raised in :py:meth:`PIL.Image.open` if an image cannot be opened and identified.
+
+    If a PNG image raises this error, setting :data:`.ImageFile.LOAD_TRUNCATED_IMAGES`
+    to true may allow the image to be opened after all. The setting will ignore missing
+    data and checksum failures.
+    """
+
+    pass
