@@ -1,0 +1,1 @@
+export default function Home(){return <main>VC Vault — opening your shared collection…</main>;}
